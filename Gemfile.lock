@@ -231,11 +231,7 @@ DEPENDENCIES
   chromedriver-helper
   coffee-rails (~> 4.2)
   execjs
-<<<<<<< HEAD
-  factory_bot_rails
-=======
   factory_girl_rails
->>>>>>> Configure generators
   jbuilder (~> 2.5)
   listen (>= 3.0.5, < 3.2)
   pg (>= 0.18, < 2.0)
