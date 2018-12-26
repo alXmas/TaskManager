@@ -1,8 +1,13 @@
-module State
+module TaskStateMachine
   extend ActiveSupport::Concern
-
   included do
     state_machine :state, initial: :new_task do
+      state :in_development
+      state :archived
+      state :in_qa
+      state :in_code_review
+      state :ready_for_release
+      state :released
       event :development do
         transition new_task: :in_development
       end
