@@ -34,6 +34,7 @@ gem "less-rails"
 gem "twitter-bootstrap-rails"
 gem "jquery-rails"
 gem 'sass-rails', '~> 5.0', '>= 5.0.6'
+gem 'sprockets'
 
 
 # Reduces boot times through caching; required in config/boot.rb
