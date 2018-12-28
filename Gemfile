@@ -31,6 +31,11 @@ gem 'simple_form'
 gem 'state_machines'
 gem 'state_machines-activerecord'
 
+gem "slim-rails"
+gem "less-rails" #Sprockets (what Rails 3.1 uses for its asset pipeline) supports LESS
+gem "twitter-bootstrap-rails"
+gem "jquery-rails"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.1.0', require: false
 
