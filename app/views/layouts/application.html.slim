@@ -5,6 +5,7 @@ html lang="en"
     meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"
     meta name="viewport" content="width=device-width, initial-scale=1.0"
     title= content_for?(:title) ? yield(:title) : "Tutorial_project"
+    
     = csrf_meta_tags
     = stylesheet_link_tag "application", :media => "all"
 
@@ -19,7 +20,12 @@ html lang="en"
       .navbar-collapse.collapse.navbar-responsive-collapse
         ul.nav.navbar-nav
           li= link_to "Board", "board_path"
-
+            -if current_user
+              li= link_to current_user.first_name
+              li= link_to "Log out", session_path, method: "delete", confirm: "confirm?", remote: true
+            -else
+              li= link_to "Sign in", new_session_path
+              li= link_to "Sign up", new_developer_path
   .container
     .row
       .col-lg-12

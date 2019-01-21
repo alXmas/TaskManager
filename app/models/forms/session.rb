@@ -2,8 +2,7 @@ class Session
   include ActiveModel::Model
 
   attr_accessor(
-      :email,
-      :password
+    :email, :password
   )
 
   validates :email, presence: true, format: { with: /\A\S+@.+\.\S+\z/ }
