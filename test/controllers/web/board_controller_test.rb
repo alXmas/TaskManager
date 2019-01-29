@@ -10,5 +10,4 @@ class Web::BoardControllerTest < ActionDispatch::IntegrationTest
     get board_url
     assert_response :success
   end
-
 end
