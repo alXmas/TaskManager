@@ -47,6 +47,7 @@ group :development, :test do
   gem 'rubocop'
   gem 'factory_bot'
   gem "factory_bot_rails"
+  gem 'bullet'
 end
 
 group :development do
