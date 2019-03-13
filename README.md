@@ -1,5 +1,6 @@
+[![Build Status](https://travis-ci.org/alXmas/TaskManager.svg?branch=feature%2Ftravis)](https://travis-ci.org/alXmas/TaskManager)
+[![Coverage Status](https://coveralls.io/repos/github/alXmas/TaskManager/badge.svg?branch=develop)](https://coveralls.io/github/alXmas/TaskManager?branch=develop)
 # Dualboot Learn
-
 This is the RoR and React application for
 [*Dualboot Learn*](https://fullstack-learning.firebaseapp.com/)
 by [Dualboot Partners](https://dualbootpartners.com/).
