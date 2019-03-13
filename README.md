@@ -1,25 +1,34 @@
-# README
+# Dualboot Learn
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is the RoR and React application for
+[*Dualboot Learn*](https://fullstack-learning.firebaseapp.com/)
+by [Dualboot Partners](https://dualbootpartners.com/).
 
-Things you may want to cover:
+## Getting started
 
-* Ruby version
+To get started with the app, clone the repo and build docker container:
 
-* System dependencies
+```
+$ docker-compose build
+```
 
-* Configuration
+Next, create and migrate the database:
 
-* Database creation
+```
+$ docker-compose run --rm web bash -c "rails db:create db:migrate"
+```
 
-* Database initialization
+Finally, run the test suite to verify that everything is working correctly:
 
-* How to run the test suite
+```
+$ docker-compose run --rm web bash -c "rails test"
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+If the test suite passes, you'll be ready to run the app in a local server:
 
-* Deployment instructions
+```
+$ docker-compose up
+```
 
-* ...
-# TaskManager
+For more information, see the
+[*Dualboot Learn*](https://fullstack-learning.firebaseapp.com/).
