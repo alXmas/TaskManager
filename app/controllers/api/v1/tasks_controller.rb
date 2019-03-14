@@ -8,7 +8,6 @@ class Api::V1::TasksController < Api::V1::ApplicationController
     q_params = params[:q] || { s: 'id asc' }
 
     tasks = Task.all
-                .includes(:author, :assignee)
                 .ransack(q_params)
                 .result
                 .page(params[:page])

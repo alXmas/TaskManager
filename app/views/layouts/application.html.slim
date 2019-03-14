@@ -4,10 +4,11 @@ html lang="en"
     meta charset="utf-8"
     meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"
     meta name="viewport" content="width=device-width, initial-scale=1.0"
-    title= content_for?(:title) ? yield(:title) : "Tutorial_project"
+    title= content_for?(:title) ? yield(:title) : "Task Manager"
     = csrf_meta_tags
     = stylesheet_link_tag "application", :media => "all"
     = javascript_include_tag "application"
+    = javascript_pack_tag "application", defer: true
 
   body
   .navbar.navbar-default.navbar-static-top
@@ -18,21 +19,21 @@ html lang="en"
           span.icon-bar
           span.icon-bar
         .col-lg-9
-          a.navbar-brand href=root_path Tutorial_project
-          .navbar-collapse.collapse.navbar-responsive-collapse
-            ul.nav.navbar-nav
-              li= link_to "Board", root_path
-              -if current_user.is_a? Admin
-                li= link_to "Admin page", admin_users_url
+          a.navbar-brand href=root_path Task Manager
+          - if current_user
+            .navbar-collapse.collapse.navbar-responsive-collapse
+              ul.nav.navbar-nav
+                li= link_to "Board", root_path
+                - if current_user.is_a? Admin
+                  li= link_to "Admin page", admin_users_url
         .col-lg-3
           ul.nav.navbar-nav
-            li= link_to "Board", "board_path"
-            - if current_user
-              li= link_to current_user.first_name
-              li= link_to "Log out", session_path, method: "delete", confirm: "confirm?", remote: true
-            - else
+            -if current_user
+                li= link_to current_user.name
+                li= link_to "Log out", session_path, method: "delete"
+            -else
               li= link_to "Sign in", new_session_path
-              li= link_to "Sign up", new_developer_path
+              li= link_to "Sign up", new_developers_path
 
   .container
     .row
@@ -42,4 +43,4 @@ html lang="en"
 
     footer
       p
-      p &copy; Company 2018
+      p &copy; Company 2019
