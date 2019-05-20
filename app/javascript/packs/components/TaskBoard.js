@@ -38,7 +38,6 @@ export default class TasksBoard extends React.Component {
     return {
       id,
       title,
-      state_event,
       total_count: (tasks) ? tasks.meta.total_count : 'None',
       cards: (tasks) ? tasks.items.map(task => ({
         ...task,
@@ -53,13 +52,13 @@ export default class TasksBoard extends React.Component {
   getBoard() {
     return {
       lanes: [
-        this.generateLane('new_task', 'New', this.getStateEventName('new_task')),
-        this.generateLane('in_development', 'In Dev', this.getStateEventName('in_development')),
-        this.generateLane('in_qa', 'In QA', this.getStateEventName('in_qa',)),
-        this.generateLane('in_code_review', 'In CR', this.getStateEventName('in_code_review')),
-        this.generateLane('ready_for_release', 'Ready for release', this.getStateEventName('ready_for_release')),
-        this.generateLane('released', 'Released', this.getStateEventName('released',)),
-        this.generateLane('archived', 'Archived', this.getStateEventName('archived')),
+        this.generateLane('new_task', 'New'),
+        this.generateLane('in_development', 'In Dev'),
+        this.generateLane('in_qa', 'In QA'),
+        this.generateLane('in_code_review', 'In CR'),
+        this.generateLane('ready_for_release', 'Ready for release'),
+        this.generateLane('released', 'Released'),
+        this.generateLane('archived', 'Archived'),
       ],
     };
   }
@@ -87,8 +86,8 @@ export default class TasksBoard extends React.Component {
   }
 
   fetchLine(state, page = 1) {
-    let params = {q: { state_eq: state }, page, per_page: 10, format: 'json'};
-    let tasks_url = Routes.api_v1_tasks_path(params);
+    const params = {q: { state_eq: state }, page, per_page: 10, format: 'json'};
+    const tasks_url = Routes.api_v1_tasks_path(params);
 
     return fetch('GET', tasks_url)
       .then(({ data }) => data);
@@ -107,8 +106,8 @@ export default class TasksBoard extends React.Component {
   }
 
   handleDragEnd = (cardId, sourceLaneId, targetLaneId) => {
-    let update_task_url = Routes.api_v1_task_path(cardId, { format: 'json' });
-    let body = { task: { state_event: this.getStateEventName(targetLaneId) } };
+    const update_task_url = Routes.api_v1_task_path(cardId, { format: 'json' });
+    const body = { task: { state_event: this.getStateEventName(targetLaneId) } };
 
     fetch('PUT', update_task_url, body)
       .then(() => {
@@ -134,7 +133,7 @@ export default class TasksBoard extends React.Component {
   }
 
   handleEditClose = (edited = '') => {
-    this.setState({ editPopupShow: false, editCardId: null});
+    this.setState({ editPopupShow: false });
     switch (edited) {
       case 'new_task':
       case 'in_development':
@@ -175,9 +174,10 @@ export default class TasksBoard extends React.Component {
         />
 
         <EditPopup
-          show = {this.state.editPopupShow}
+          key={this.state.editCardId}
+          show={this.state.editPopupShow}
           onClose={this.handleEditClose}
-          cardId ={this.state.editCardId}
+          cardId={this.state.editCardId}
         />
       </div>
     );

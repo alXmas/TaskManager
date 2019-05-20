@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Button, FormGroup, FormLabel, FormControl } from 'react-bootstrap';
+import { Modal, Button, FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
 import { fetch } from '../utils/Fetch';
 
 export default class EditPopup extends React.Component {
@@ -25,25 +25,27 @@ export default class EditPopup extends React.Component {
     isLoading: true,
   }
 
-  loadCard = (cardId) => {
-    this.setState({ isLoading: true });
-    fetch('GET', Routes.api_v1_task_path(cardId, {format: 'json'})).then(({data}) => {
-      this.setState({ task: data});
-      this.setState({ isLoading: false });
-    });
+  constructor(props) {
+    super(props);
+
+    if (props.cardId) {
+      this.state.isLoading = true;
+      this.loadCard(props.cardId);
+    }
   }
 
-  componentDidUpdate (prevProps) {
-    if (this.props.cardId != null && this.props.cardId !== prevProps.cardId) {
-      this.loadCard(this.props.cardId);
-    };
+  loadCard = (cardId) => {
+    fetch('GET', Routes.api_v1_task_path(cardId, {format: 'json'}))
+      .then(({data}) => {
+        this.setState({ task: data, isLoading: false });
+      });
   }
 
   handleNameChange = (e) => {
     this.setState({ task: { ...this.state.task, name: e.target.value }});
   }
 
-  handleDecriptionChange = (e) => {
+  handleDescriptionChange = (e) => {
     this.setState({ task: { ...this.state.task, description: e.target.value }});
   }
 
@@ -54,25 +56,15 @@ export default class EditPopup extends React.Component {
       author_id: this.state.task.author.id,
       assignee_id: this.state.task.assignee.id,
       state: this.state.task.state
-    }).then( response => {
-      if (response.statusText == 'OK') {
-        this.props.onClose(this.state.task.state);
-      }
-      else {
-        alert('Update failed! ' + response.status + ' - ' + response.statusText);
-      }
+    }).then(() => {
+        this.props.onClose(true);
     });
   }
 
   handleCardDelete = () => {
     fetch('DELETE', Routes.api_v1_task_path(this.props.cardId, { format: 'json' }))
-      .then( response => {
-        if (response.statusText == 'OK') {
-          this.props.onClose(this.state.task.state);
-        }
-        else {
-          alert('DELETE failed! ' + response.status + ' - ' + response.statusText);
-        }
+      .then(() => {
+          this.props.onClose(true);
       });
   }
 
@@ -107,7 +99,7 @@ export default class EditPopup extends React.Component {
           <Modal.Body>
             <form>
               <FormGroup controlId="formTaskName">
-                <FormLabel>Task name:</FormLabel>
+                <ControlLabel>Task name:</ControlLabel>
                 <FormControl
                   type="text"
                   value={this.state.task.name}
@@ -116,12 +108,12 @@ export default class EditPopup extends React.Component {
                 />
               </FormGroup>
               <FormGroup controlId="formDescriptionName">
-                <FormLabel>Task description:</FormLabel>
+                <ControlLabel>Task description:</ControlLabel>
                 <FormControl
                   componentClass="textarea"
                   value={this.state.task.description}
                   placeholder='Set the description for the task'
-                  onChange={this.handleDecriptionChange}
+                  onChange={this.handleDescriptionChange}
                 />
               </FormGroup>
             </form>

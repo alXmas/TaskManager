@@ -36,7 +36,6 @@ module.exports = function(api) {
       ]
     ].filter(Boolean),
     plugins: [
-      requare('@babel/preset-react'),
       require('babel-plugin-macros'),
       require('@babel/plugin-syntax-dynamic-import').default,
       isTestEnv && require('babel-plugin-dynamic-import-node'),

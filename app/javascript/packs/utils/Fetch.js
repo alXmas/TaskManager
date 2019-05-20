@@ -23,12 +23,3 @@ export function fetch(method, url, body) {
   };
   return axios(options);
 }
-
-export function fetchJson(method, url, body) {
-  const newUrl = url
-    .split("?")
-    .reduce((a, e, i) => (i === 0 ? [...a, `${e}.json?`] : [...a, e]), [])
-    .join("");
-
-  return fetch(method, newUrl, body);
-}
