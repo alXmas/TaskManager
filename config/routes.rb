@@ -1,10 +1,9 @@
-Rails.application.routes.draw do
-  root :to => "web/board#show"
 
+Rails.application.routes.draw do
   scope module: :web do
     resource :board, only: :show
     resource :session, only: [:new, :create, :destroy]
-    resources :developers, only: [:new, :create]
+    resource :developers, only: [:new, :create]
   end
 
   namespace :admin do
@@ -13,8 +12,11 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :tasks, defaults: {format: 'json'}, only: [:index, :show, :create, :update, :destroy]
+      resources :tasks, only: [:index, :show, :create, :update, :destroy]
+      resources :users, only: [:index, :show]
     end
   end
-end
 
+  root :to => "web/board#show"
+  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+end

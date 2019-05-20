@@ -2,12 +2,12 @@ require 'test_helper'
 
 class Web::DevelopersControllerTest < ActionDispatch::IntegrationTest
   test "should get new" do
-    get new_developer_path
+    get new_developers_url
     assert_response :success
   end
 
   test "should get create" do
-    post developers_path, params: { developer: attributes_for(:developer) }
+    post developers_url, params: { developer: attributes_for(:developer) }
     assert_response :redirect
   end
 end

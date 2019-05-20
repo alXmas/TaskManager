@@ -30,8 +30,7 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
 
   test "should patch update" do
     user = create(:user)
-    attrs = attributes_for(:user)
-    patch admin_user_url user.id, params: { user: attrs }
+    patch admin_user_url user.id, params: { user: attributes_for(:user) }
     assert_response :redirect
   end
 
