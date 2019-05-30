@@ -1,5 +1,8 @@
 import React from 'react';
-import { Modal, Button, FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
+import {
+  Modal, Button, FormGroup, ControlLabel, FormControl,
+} from 'react-bootstrap';
+import UserSelect from './UserSelect';
 import { fetch } from '../utils/Fetch';
 
 export default class EditPopup extends React.Component {
@@ -13,14 +16,14 @@ export default class EditPopup extends React.Component {
         id: null,
         first_name: null,
         last_name: null,
-        email: null
+        email: null,
       },
       assignee: {
         id: null,
         first_name: null,
-        last_name:  null,
-        email: null
-      }
+        last_name: null,
+        email: null,
+      },
     },
     isLoading: true,
   }
@@ -35,43 +38,61 @@ export default class EditPopup extends React.Component {
   }
 
   loadCard = (cardId) => {
-    fetch('GET', Routes.api_v1_task_path(cardId, {format: 'json'}))
-      .then(({data}) => {
+    const taskUrl = Routes.api_v1_task_path(cardId, { format: 'json' });
+
+    fetch('GET', taskUrl)
+      .then(({ data }) => {
         this.setState({ task: data, isLoading: false });
       });
   }
 
   handleNameChange = (e) => {
-    this.setState({ task: { ...this.state.task, name: e.target.value }});
+    this.setState({ task: { ...this.state.task, name: e.target.value } });
   }
 
   handleDescriptionChange = (e) => {
-    this.setState({ task: { ...this.state.task, description: e.target.value }});
+    this.setState({ task: { ...this.state.task, description: e.target.value } });
   }
 
   handleCardEdit = () => {
-    fetch('PUT', Routes.api_v1_task_path(this.props.cardId, {format: 'json'}), {
-      name: this.state.task.name,
-      description: this.state.task.description,
-      author_id: this.state.task.author.id,
-      assignee_id: this.state.task.assignee.id,
-      state: this.state.task.state
-    }).then(() => {
+    const { task } = this.state;
+    const taskUrl = Routes.api_v1_task_path(this.props.cardId, { format: 'json' });
+
+    fetch('PUT', taskUrl, {
+      name: task.name,
+      description: task.description,
+      author_id: task.author.id,
+      assignee_id: task.assignee.id,
+      state: task.state,
+    }).then((response) => {
         this.props.onClose(true);
     });
   }
 
   handleCardDelete = () => {
-    fetch('DELETE', Routes.api_v1_task_path(this.props.cardId, { format: 'json' }))
-      .then(() => {
-          this.props.onClose(true);
+    const taskUrl = Routes.api_v1_task_path(this.props.cardId, { format: 'json' });
+
+    fetch('DELETE', taskUrl)
+      .then((response) => {
+        this.props.onClose(true);
       });
   }
 
-  render () {
-    if (this.state.isLoading) {
+  handleAuthorChange = (value) => {
+    this.setState({ task: { ...this.state.task, author: value } });
+  }
+
+  handleAssigneeChange = (value) => {
+    this.setState({ task: { ...this.state.task, assignee: value } });
+  }
+
+  render() {
+    const { show, onClose } = this.props;
+    const { isLoading } = this.state;
+
+    if (isLoading) {
       return (
-        <Modal show={this.props.show} onHide={this.props.onClose}>
+        <Modal show={show} onHide={onClose}>
           <Modal.Header closeButton>
             <Modal.Title>
               Info
@@ -81,29 +102,40 @@ export default class EditPopup extends React.Component {
             Your task is loading. Please be patient.
           </Modal.Body>
           <Modal.Footer>
-            <Button onClick={this.props.onClose}>Close</Button>
+            <Button onClick={onClose}>Close</Button>
           </Modal.Footer>
         </Modal>
-      )
+      );
     }
+
+    const { task } = this.state;
 
     return (
       <div>
-        <Modal show={this.props.show} onHide={this.props.onClose}>
+        <Modal show={show} onHide={onClose}>
           <Modal.Header closeButton>
             <Modal.Title>
-              Task # {this.state.task.id} [{this.state.task.state}]
+              Task # {task.id} [{task.state}]
             </Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
             <form>
+              <FormGroup controlId="formAuthor">
+                <ControlLabel type="text">Author:</ControlLabel>
+                <UserSelect
+                  id="Author"
+                  isDisabled
+                  value={task.author}
+                  onChange={this.handleAuthorChange}
+                />
+              </FormGroup>
               <FormGroup controlId="formTaskName">
                 <ControlLabel>Task name:</ControlLabel>
                 <FormControl
                   type="text"
-                  value={this.state.task.name}
-                  placeholder='Set the name for the task'
+                  value={task.name}
+                  placeholder="Set the name for the task"
                   onChange={this.handleNameChange}
                 />
               </FormGroup>
@@ -111,22 +143,29 @@ export default class EditPopup extends React.Component {
                 <ControlLabel>Task description:</ControlLabel>
                 <FormControl
                   componentClass="textarea"
-                  value={this.state.task.description}
-                  placeholder='Set the description for the task'
+                  value={task.description}
+                  placeholder="Set the description for the task"
                   onChange={this.handleDescriptionChange}
                 />
               </FormGroup>
+              <FormGroup controlId="formAssignee">
+                <ControlLabel type="text">Assignee:</ControlLabel>
+                <UserSelect
+                  id="Assignee"
+                  onChange={this.handleAssigneeChange}
+                  value={task.assignee}
+                />
+              </FormGroup>
             </form>
-            Author: {this.state.task.author.first_name} {this.state.task.author.last_name}
           </Modal.Body>
 
           <Modal.Footer>
             <Button bsStyle="danger" onClick={this.handleCardDelete}>Delete</Button>
-            <Button onClick={this.props.onClose}>Close</Button>
+            <Button onClick={onClose}>Close</Button>
             <Button bsStyle="primary" onClick={this.handleCardEdit}>Save changes</Button>
           </Modal.Footer>
         </Modal>
       </div>
-    )
+    );
   }
 }

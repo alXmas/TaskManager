@@ -6,12 +6,12 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in_as admin
   end
 
-  test "should get index" do
+  test 'should get index' do
     get admin_users_url
     assert_response :success
   end
 
-  test "should get show" do
+  test 'should get show' do
     user = create(:user, { password: generate(:string) })
     get admin_user_url user.id
     assert_response :success

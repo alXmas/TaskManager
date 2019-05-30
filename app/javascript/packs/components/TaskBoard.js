@@ -32,7 +32,7 @@ export default class TasksBoard extends React.Component {
     archived: 'archive',
   }
 
-  generateLane(id, title, state_event) {
+  generateLane(id, title) {
     const tasks = this.state[id];
 
     return {
@@ -86,30 +86,31 @@ export default class TasksBoard extends React.Component {
   }
 
   fetchLine(state, page = 1) {
-    const params = {q: { state_eq: state }, page, per_page: 10, format: 'json'};
-    const tasks_url = Routes.api_v1_tasks_path(params);
+    const params = {
+      q: { state_eq: state }, page, per_page: 10, format: 'json',
+    };
+    const tasksUrl = Routes.api_v1_tasks_path(params);
 
-    return fetch('GET', tasks_url)
-      .then(({ data }) => data);
-  }
+    return fetch('GET', tasksUrl)
+      .then(({ data }) => {
+        const preparedTasks = data.items.map(task => ({ ...task, id: task.id.toString() }));
 
-  onLaneScroll = (requestedPage, state) => {
-    return this.fetchLine(state, requestedPage).then(({items}) => {
-      return items.map((task) => {
-        return {
-          ...task,
-          label: task.state,
-          title: task.name
-        };
+        return { ...data, items: preparedTasks };
       });
-    })
   }
+
+  onLaneScroll = (requestedPage, state) => this.fetchLine(state, requestedPage)
+    .then(({ items }) => items.map(task => ({
+      ...task,
+      label: task.state,
+      title: task.name,
+    })))
 
   handleDragEnd = (cardId, sourceLaneId, targetLaneId) => {
-    const update_task_url = Routes.api_v1_task_path(cardId, { format: 'json' });
+    const taskUrl = Routes.api_v1_task_path(cardId, { format: 'json' });
     const body = { task: { state_event: this.getStateEventName(targetLaneId) } };
 
-    fetch('PUT', update_task_url, body)
+    fetch('PUT', taskUrl, body)
       .then(() => {
         this.loadLine(sourceLaneId);
         this.loadLine(targetLaneId);
@@ -124,11 +125,11 @@ export default class TasksBoard extends React.Component {
     this.setState({ addPopupShow: false });
     if (added == true) {
       this.loadLine('new_task');
-    };
+    }
   }
 
   onCardClick = (cardId) => {
-    this.setState({editCardId: cardId});
+    this.setState({ editCardId: cardId });
     this.handleEditShow();
   }
 
@@ -152,6 +153,8 @@ export default class TasksBoard extends React.Component {
   handleEditShow = () => this.setState({ editPopupShow: true });
 
   render() {
+    const { state } = this;
+
     return (
       <div>
         <h1>Your tasks</h1>
@@ -164,20 +167,20 @@ export default class TasksBoard extends React.Component {
           onLaneScroll={this.onLaneScroll}
           data={this.getBoard()}
           customLaneHeader={<LaneHeader />}
-          cardsMeta={this.state}
+          cardsMeta={state}
           onCardClick={this.onCardClick}
         />
 
         <AddPopup
-          show = {this.state.addPopupShow}
+          show={state.addPopupShow}
           onClose={this.handleAddClose}
         />
 
         <EditPopup
-          key={this.state.editCardId}
-          show={this.state.editPopupShow}
+          key={state.editCardId}
+          show={state.editPopupShow}
           onClose={this.handleEditClose}
-          cardId={this.state.editCardId}
+          cardId={state.editCardId}
         />
       </div>
     );
