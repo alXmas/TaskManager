@@ -1,16 +1,15 @@
-import React from 'react';
-import Board from 'react-trello';
-import { Button } from 'react-bootstrap';
-import { fetch } from '../utils/Fetch';
-import AddPopup from './AddPopup';
-import EditPopup from './EditPopup';
-import LaneHeader from './LaneHeader';
+import React from "react";
+import Board from "react-trello";
+import { Button } from "react-bootstrap";
 
-export default class TasksBoard extends React.Component {
+import LaneHeader from "./LaneHeader";
+import AddPopup from "./AddPopup";
+import EditPopup from "./EditPopup";
+
+import { fetch } from "../utils/fetch";
+
+export default class TaskBoard extends React.Component {
   state = {
-    addPopupShow: false,
-    editPopupShow: false,
-    editCardId: null,
     board: {
       new_task: null,
       in_development: null,
@@ -18,169 +17,172 @@ export default class TasksBoard extends React.Component {
       in_code_review: null,
       ready_for_release: null,
       released: null,
-      archived: null,
+      archived: null
     },
-  }
+    addPopupShow: false,
+    editPopupShow: false,
+    editCardId: null
+  };
 
-  state_events = {
-    new_task: null,
-    in_development: 'start_develop',
-    in_qa: 'start_qa',
-    in_code_review: 'start_review',
-    ready_for_release: 'mark_as_ready',
-    released: 'release',
-    archived: 'archive',
-  }
-
-  generateLane(id, title) {
-    const tasks = this.state[id];
-
-    return {
-      id,
-      title,
-      total_count: (tasks) ? tasks.meta.total_count : 'None',
-      cards: (tasks) ? tasks.items.map(task => ({
-        ...task,
-        label: task.state,
-        title: task.name,
-      })) : [],
-    };
-  }
-
-  getStateEventName = stateId => this.state_events[stateId];
-
-  getBoard() {
-    return {
-      lanes: [
-        this.generateLane('new_task', 'New'),
-        this.generateLane('in_development', 'In Dev'),
-        this.generateLane('in_qa', 'In QA'),
-        this.generateLane('in_code_review', 'In CR'),
-        this.generateLane('ready_for_release', 'Ready for release'),
-        this.generateLane('released', 'Released'),
-        this.generateLane('archived', 'Archived'),
-      ],
-    };
-  }
-
-  loadLines() {
-    this.loadLine('new_task');
-    this.loadLine('in_development');
-    this.loadLine('in_qa');
-    this.loadLine('in_code_review');
-    this.loadLine('ready_for_release');
-    this.loadLine('released');
-    this.loadLine('archived');
-  }
+  stateEvents = {
+    in_development: "develop",
+    in_qa: "qa",
+    in_code_review: "code_review",
+    ready_for_release: "ready",
+    released: "release",
+    archived: "archive"
+  };
 
   componentDidMount() {
     this.loadLines();
   }
 
-  loadLine(state, page = 1) {
-    this.fetchLine(state, page).then((data) => {
-      this.setState({
-        [state]: data,
-      });
-    });
-  }
+  onLaneScroll = (requestedPage, state) => {
+    return this.fetchLine(state, requestedPage).then(({ items }) =>
+      items.map(task => ({
+        ...task,
+        label: task.state,
+        title: task.name
+      }))
+    );
+  };
 
-  fetchLine(state, page = 1) {
-    const params = {
-      q: { state_eq: state }, page, per_page: 10, format: 'json',
+  getBoard = () => {
+    return {
+      lanes: [
+        this.generateLane("new_task", "New"),
+        this.generateLane("in_development", "In Dev"),
+        this.generateLane("in_qa", "In QA"),
+        this.generateLane("in_code_review", "In CR"),
+        this.generateLane("ready_for_release", "Ready for release"),
+        this.generateLane("released", "Released"),
+        this.generateLane("archived", "Archived")
+      ]
     };
-    const tasksUrl = Routes.api_v1_tasks_path(params);
+  };
 
-    return fetch('GET', tasksUrl)
-      .then(({ data }) => {
-        const preparedTasks = data.items.map(task => ({ ...task, id: task.id.toString() }));
+  fetchLine = (state, page = 1) => {
+    return fetch(
+      "GET",
+      window.Routes.api_v1_tasks_path({
+        q: { state_eq: state },
+        page,
+        per_page: 10,
+        format: "json"
+      })
+    ).then(({ data }) => {
+      return data;
+    });
+  };
 
-        return { ...data, items: preparedTasks };
-      });
-  }
+  loadLines = () => {
+    this.loadLine("new_task");
+    this.loadLine("in_development");
+    this.loadLine("in_qa");
+    this.loadLine("in_code_review");
+    this.loadLine("ready_for_release");
+    this.loadLine("released");
+    this.loadLine("archived");
+  };
 
-  onLaneScroll = (requestedPage, state) => this.fetchLine(state, requestedPage)
-    .then(({ items }) => items.map(task => ({
-      ...task,
-      label: task.state,
-      title: task.name,
-    })))
+  loadLine = (state, page = 1) => {
+    this.fetchLine(state, page).then(data => {
+      this.setState(prevState => ({
+        ...prevState,
+        board: {
+          ...prevState.board,
+          [state]: data
+        }
+      }));
+    });
+  };
 
   handleDragEnd = (cardId, sourceLaneId, targetLaneId) => {
-    const taskUrl = Routes.api_v1_task_path(cardId, { format: 'json' });
-    const body = { task: { state_event: this.getStateEventName(targetLaneId) } };
-
-    fetch('PUT', taskUrl, body)
-      .then(() => {
-        this.loadLine(sourceLaneId);
-        this.loadLine(targetLaneId);
-      });
-  }
+    fetch("PUT", window.Routes.api_v1_task_path(cardId, { format: "json" }), {
+      task: { state_event: this.stateEvents[targetLaneId] }
+    }).then(() => {
+      this.loadLine(sourceLaneId);
+      this.loadLine(targetLaneId);
+    });
+  };
 
   handleAddShow = () => {
     this.setState({ addPopupShow: true });
-  }
+  };
 
   handleAddClose = (added = false) => {
     this.setState({ addPopupShow: false });
-    if (added == true) {
-      this.loadLine('new_task');
+    if (added) {
+      this.loadLine("new_task");
     }
-  }
+  };
 
-  onCardClick = (cardId) => {
+  onCardClick = cardId => {
     this.setState({ editCardId: cardId });
     this.handleEditShow();
-  }
+  };
 
-  handleEditClose = (edited = '') => {
-    this.setState({ editPopupShow: false });
+  handleEditShow = () => {
+    this.setState({ editPopupShow: true });
+  };
+
+  handleEditClose = (edited = "") => {
+    this.setState({ editPopupShow: false, editCardId: null });
     switch (edited) {
-      case 'new_task':
-      case 'in_development':
-      case 'in_qa':
-      case 'in_code_review':
-      case 'ready_for_release':
-      case 'released':
-      case 'archived':
+      case "new_task":
+      case "in_development":
+      case "in_qa":
+      case "in_code_review":
+      case "ready_for_release":
+      case "released":
+      case "archived":
         this.loadLine(edited);
         break;
       default:
         break;
     }
+  };
+
+  generateLane(id, title) {
+    const { board } = this.state;
+    const tasks = board[id];
+    return {
+      id,
+      title,
+      total_count: tasks ? tasks.meta.total_count : "None",
+      cards: tasks
+        ? tasks.items.map(task => ({
+            ...task,
+            label: task.state,
+            title: task.name
+          }))
+        : []
+    };
   }
 
-  handleEditShow = () => this.setState({ editPopupShow: true });
-
   render() {
-    const { state } = this;
-
+    const { addPopupShow, editPopupShow, editCardId } = this.state;
     return (
       <div>
         <h1>Your tasks</h1>
-        <Button bsStyle="primary" onClick={this.handleAddShow}>Create new task</Button>
-
+        <Button bsStyle="primary" onClick={this.handleAddShow}>
+          Create new task
+        </Button>
         <Board
+          data={this.getBoard()}
+          onLaneScroll={this.onLaneScroll}
+          customLaneHeader={<LaneHeader />}
+          cardsMeta={this.state}
           draggable
           laneDraggable={false}
           handleDragEnd={this.handleDragEnd}
-          onLaneScroll={this.onLaneScroll}
-          data={this.getBoard()}
-          customLaneHeader={<LaneHeader />}
-          cardsMeta={state}
           onCardClick={this.onCardClick}
         />
-
-        <AddPopup
-          show={state.addPopupShow}
-          onClose={this.handleAddClose}
-        />
-
+        <AddPopup show={addPopupShow} onClose={this.handleAddClose} />
         <EditPopup
-          key={state.editCardId}
-          show={state.editPopupShow}
+          show={editPopupShow}
           onClose={this.handleEditClose}
-          cardId={state.editCardId}
+          cardId={editCardId}
         />
       </div>
     );

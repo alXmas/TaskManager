@@ -1,168 +1,174 @@
-import React from 'react';
-import {
-  Modal, Button, FormGroup, ControlLabel, FormControl,
-} from 'react-bootstrap';
-import UserSelect from './UserSelect';
-import { fetch } from '../utils/Fetch';
+import React from "react";
+import { Modal, Button, FormControl } from "react-bootstrap";
+
+import LoadingPopup from "./LoadingPopup";
+import UserSelect from "./UserSelect";
+import FormField from "./FormField";
+import { fetch } from "../utils/fetch";
 
 export default class EditPopup extends React.Component {
   state = {
     task: {
       id: null,
-      name: '',
-      description: '',
+      name: "",
+      description: "",
       state: null,
       author: {
         id: null,
         first_name: null,
         last_name: null,
-        email: null,
+        email: null
       },
       assignee: {
         id: null,
         first_name: null,
         last_name: null,
-        email: null,
-      },
+        email: null
+      }
     },
-    isLoading: true,
-  }
+    isLoading: true
+  };
 
-  constructor(props) {
-    super(props);
-
-    if (props.cardId) {
-      this.state.isLoading = true;
-      this.loadCard(props.cardId);
+  componentDidUpdate(prevProps) {
+    const { cardId } = this.props;
+    if (cardId != null && cardId !== prevProps.cardId) {
+      this.loadCard(cardId);
     }
   }
 
-  loadCard = (cardId) => {
-    const taskUrl = Routes.api_v1_task_path(cardId, { format: 'json' });
+  loadCard = cardId => {
+    this.setState({ isLoading: true });
+    fetch(
+      "GET",
+      window.Routes.api_v1_task_path(cardId, { format: "json" })
+    ).then(({ data }) => {
+      this.setState({ task: data, isLoading: false });
+    });
+  };
 
-    fetch('GET', taskUrl)
-      .then(({ data }) => {
-        this.setState({ task: data, isLoading: false });
-      });
-  }
+  handleNameChange = e => {
+    const { value } = e.target;
+    this.setState(prevState => ({
+      task: { ...prevState.task, name: value }
+    }));
+  };
 
-  handleNameChange = (e) => {
-    this.setState({ task: { ...this.state.task, name: e.target.value } });
-  }
+  handleDescriptionChange = e => {
+    const { value } = e.target;
+    this.setState(prevState => ({
+      task: { ...prevState.task, description: value }
+    }));
+  };
 
-  handleDescriptionChange = (e) => {
-    this.setState({ task: { ...this.state.task, description: e.target.value } });
-  }
+  handleResponse = (response, message) => {
+    const { task } = this.state;
+    const { onClose } = this.props;
+    const { state } = task;
+    if (response.statusText === "OK") {
+      onClose(state);
+    } else {
+      alert(`${message} ${response.status} - ${response.statusText}`);
+    }
+  };
+
+  handleCardDelete = () => {
+    const { cardId } = this.props;
+    fetch(
+      "DELETE",
+      window.Routes.api_v1_task_path(cardId, { format: "json" })
+    ).then(response => this.handleResponse(response, "DELETE failed!"));
+  };
 
   handleCardEdit = () => {
     const { task } = this.state;
-    const taskUrl = Routes.api_v1_task_path(this.props.cardId, { format: 'json' });
+    const { cardId } = this.props;
+    const { name, description, state, author, assignee } = task;
+    fetch("PUT", window.Routes.api_v1_task_path(cardId, { format: "json" }), {
+      name,
+      description,
+      author_id: author.id,
+      assignee_id: assignee.id,
+      state
+    }).then(response => this.handleResponse(response, "Update failed!"));
+  };
 
-    fetch('PUT', taskUrl, {
-      name: task.name,
-      description: task.description,
-      author_id: task.author.id,
-      assignee_id: task.assignee.id,
-      state: task.state,
-    }).then((response) => {
-        this.props.onClose(true);
-    });
-  }
+  handleAuthorChange = value => {
+    this.setState(prevState => ({
+      task: { ...prevState.task, author: value }
+    }));
+  };
 
-  handleCardDelete = () => {
-    const taskUrl = Routes.api_v1_task_path(this.props.cardId, { format: 'json' });
-
-    fetch('DELETE', taskUrl)
-      .then((response) => {
-        this.props.onClose(true);
-      });
-  }
-
-  handleAuthorChange = (value) => {
-    this.setState({ task: { ...this.state.task, author: value } });
-  }
-
-  handleAssigneeChange = (value) => {
-    this.setState({ task: { ...this.state.task, assignee: value } });
-  }
+  handleAssigneeChange = value => {
+    this.setState(prevState => ({
+      task: { ...prevState.task, assignee: value }
+    }));
+  };
 
   render() {
+    const { isLoading, task } = this.state;
     const { show, onClose } = this.props;
-    const { isLoading } = this.state;
-
-    if (isLoading) {
-      return (
-        <Modal show={show} onHide={onClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>
-              Info
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Your task is loading. Please be patient.
-          </Modal.Body>
-          <Modal.Footer>
-            <Button onClick={onClose}>Close</Button>
-          </Modal.Footer>
-        </Modal>
-      );
-    }
-
-    const { task } = this.state;
-
-    return (
+    if (isLoading) { return <LoadingPopup show={show} onClose={onClose} />; }
+    return ( 
       <div>
         <Modal show={show} onHide={onClose}>
           <Modal.Header closeButton>
             <Modal.Title>
-              Task # {task.id} [{task.state}]
+              {/* eslint-disable-next-line prettier/prettier */}
+              Task # 
+              {task.id}
+              [
+              {task.state}
+              ]
             </Modal.Title>
           </Modal.Header>
 
           <Modal.Body>
             <form>
-              <FormGroup controlId="formAuthor">
-                <ControlLabel type="text">Author:</ControlLabel>
-                <UserSelect
-                  id="Author"
-                  isDisabled
-                  value={task.author}
-                  onChange={this.handleAuthorChange}
-                />
-              </FormGroup>
-              <FormGroup controlId="formTaskName">
-                <ControlLabel>Task name:</ControlLabel>
+              <FormField controlId="formTaskName" controlLabel="Task name:">
                 <FormControl
                   type="text"
                   value={task.name}
                   placeholder="Set the name for the task"
                   onChange={this.handleNameChange}
                 />
-              </FormGroup>
-              <FormGroup controlId="formDescriptionName">
-                <ControlLabel>Task description:</ControlLabel>
+              </FormField>
+              <FormField
+                controlId="formDescriptionName"
+                controlLabel="Task description:"
+              >
                 <FormControl
                   componentClass="textarea"
                   value={task.description}
                   placeholder="Set the description for the task"
                   onChange={this.handleDescriptionChange}
                 />
-              </FormGroup>
-              <FormGroup controlId="formAssignee">
-                <ControlLabel type="text">Assignee:</ControlLabel>
+              </FormField>
+              <FormField controlId="formAuthor" controlLabel="Author:">
+                <UserSelect
+                  id="Author"
+                  isDisabled="true"
+                  value={task.author}
+                  onChange={this.handleAuthorChange}
+                />
+              </FormField>
+              <FormField controlId="formAssignee" controlLabel="Assignee:">
                 <UserSelect
                   id="Assignee"
                   onChange={this.handleAssigneeChange}
                   value={task.assignee}
                 />
-              </FormGroup>
+              </FormField>
             </form>
           </Modal.Body>
 
           <Modal.Footer>
-            <Button bsStyle="danger" onClick={this.handleCardDelete}>Delete</Button>
+            <Button bsStyle="danger" onClick={this.handleCardDelete}>
+              Delete
+            </Button>
             <Button onClick={onClose}>Close</Button>
-            <Button bsStyle="primary" onClick={this.handleCardEdit}>Save changes</Button>
+            <Button bsStyle="primary" onClick={this.handleCardEdit}>
+              Save changes
+            </Button>
           </Modal.Footer>
         </Modal>
       </div>

@@ -1,13 +1,13 @@
-import React from 'react';
+import React from "react";
 
-export default class LaneHeader extends React.Component {
-  render() {
-    const { id, cards, total_count } = this.props;
+const LaneHeader = props => {
+  const { id, cards, total_count } = props;
+  return (
+    <div>
+      {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
+      <b>{id}</b> ({cards.length}/{total_count})
+    </div>
+  );
+};
 
-    return (
-      <div>
-        <b>{id}</b> ({cards.length} / {total_count})
-      </div>
-    );
-  }
-}
+export default LaneHeader;
