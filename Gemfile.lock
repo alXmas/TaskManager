@@ -333,7 +333,7 @@ DEPENDENCIES
   jquery-rails
   js-routes
   kaminari
-  listen (>= 3.0.5, < 3.2)
+  listen
   newrelic_rpm
   pg (>= 0.18, < 2.0)
   puma (~> 3.11)
@@ -359,7 +359,7 @@ DEPENDENCIES
   webpacker-react
 
 RUBY VERSION
-   ruby 2.5.5p157
+   ruby 2.6.5p114
 
 BUNDLED WITH
    1.17.3
