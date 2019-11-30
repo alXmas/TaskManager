@@ -1,25 +1,17 @@
-import React from "react";
-import AsyncSelect from "react-select/lib/Async";
+import React, { Component } from "react";
+import AsyncSelect from "react-select/async";
+import { fetch } from "../utils/Fetch";
 
-import { fetch } from "../utils/fetch";
-
-export default class UserSelect extends React.Component {
+class UserSelect extends Component {
   state = {
     inputValue: ""
   };
-
-  componentDidMount() {
-    this.loadOptions();
-  }
-
   getOptionLabel = option => {
-    return `${option.first_name} ${option.last_name}`;
+    return option.first_name + " " + option.last_name;
   };
-
   getOptionValue = option => {
     return option.id;
   };
-
   loadOptions = inputValue => {
     return fetch(
       "GET",
@@ -31,13 +23,14 @@ export default class UserSelect extends React.Component {
       return data.items;
     });
   };
-
   handleInputChange = newValue => {
     const inputValue = newValue.replace(/\W/g, "");
     this.setState({ inputValue });
     return inputValue;
   };
-
+  componentDidMount() {
+    this.loadOptions();
+  }
   render() {
     return (
       <div>
@@ -56,3 +49,5 @@ export default class UserSelect extends React.Component {
     );
   }
 }
+
+export default UserSelect;
