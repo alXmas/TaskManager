@@ -1,10 +1,10 @@
-import React from "react";
+import React, { Component } from "react";
 
 import MakePopupBody from "./MakePopupBody";
 import { Modal, Button } from "react-bootstrap";
-import { fetch } from "../../utils/Fetch";
+import { createCard } from "../../utils/FetchHelper";
 
-class AddPopup extends React.Component {
+class AddPopup extends Component {
   state = {
     name: "",
     description: "",
@@ -29,7 +29,7 @@ class AddPopup extends React.Component {
   };
 
   handleCardAdd = () => {
-    fetch("POST", window.Routes.api_v1_tasks_path(), {
+    createCard({
       task: {
         name: this.state.name,
         description: this.state.description,

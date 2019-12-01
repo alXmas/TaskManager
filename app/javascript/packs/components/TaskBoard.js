@@ -1,13 +1,14 @@
-import React from "react";
+import React, { Component } from "react";
 
 import Board from "react-trello";
 import LaneHeader from "./LaneHeader";
 import AddPopup from "./popup/AddPopup";
 import EditPopup from "./popup/EditPopup";
+import { updateCard } from "../utils/FetchHelper";
 import { fetch } from "../utils/Fetch";
 import { Button } from "react-bootstrap";
 
-class TasksBoard extends React.Component {
+class TasksBoard extends Component {
   state = {
     board: {
       new_task: null,
@@ -105,7 +106,7 @@ class TasksBoard extends React.Component {
   };
 
   handleDragEnd = (cardId, sourceLaneId, targetLaneId) => {
-    fetch("PUT", window.Routes.api_v1_task_path(cardId, { format: "json" }), {
+    updateCard(cardId, {
       task: { state: targetLaneId }
     }).then(() => {
       this.loadLine(sourceLaneId);

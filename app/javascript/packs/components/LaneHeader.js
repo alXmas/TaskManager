@@ -1,6 +1,6 @@
-import React, { Fragment } from "react";
+import React, { Fragment, Component } from "react";
 
-class LaneHeader extends React.Component {
+class LaneHeader extends Component {
   render() {
     return (
       <Fragment>

@@ -1,39 +1,17 @@
-import React from "react";
+import React, { Component } from "react";
 import { Modal, Button } from "react-bootstrap";
-import { fetch } from "../../utils/Fetch";
+import { getCard, updateCard, deleteCard } from "../../utils/FetchHelper";
+import Form from "./Form";
 import MakePopupBody from "./MakePopupBody";
 
-class EditPopup extends React.Component {
-  state = {
-    task: {
-      id: null,
-      name: "",
-      description: "",
-      state: null,
-      author: {
-        id: null,
-        first_name: null,
-        last_name: null,
-        email: null
-      },
-      assignee: {
-        id: null,
-        first_name: null,
-        last_name: null,
-        email: null
-      }
-    },
-    isLoading: true
-  };
+class EditPopup extends Component {
+  state = Form.defaultAttributes();
 
   loadCard = cardId => {
     this.setState({ isLoading: true });
-    fetch(
-      "GET",
-      window.Routes.api_v1_task_path(cardId, { format: "json" })
-    ).then(({ data }) => {
-      this.setState({ task: data });
-      this.setState({ isLoading: false });
+
+    getCard(cardId).then(({ data }) => {
+      this.setState({ task: data, isLoading: false });
     });
   };
 
@@ -54,18 +32,11 @@ class EditPopup extends React.Component {
   };
 
   handleCardEdit = () => {
-    fetch(
-      "PUT",
-      window.Routes.api_v1_task_path(this.props.cardId, { format: "json" }),
-      {
-        name: this.state.task.name,
-        description: this.state.task.description,
-        author_id: this.state.task.author.id,
-        assignee_id: this.state.task.assignee.id,
-        state: this.state.task.state
-      }
+    updateCard(
+      this.props.cardId,
+      Form.attributesToSubmit(this.state.task)
     ).then(response => {
-      if (response.statusText == "OK") {
+      if (response.statusText === "OK") {
         this.props.onClose(this.state.task.state);
       } else {
         alert(
@@ -76,11 +47,8 @@ class EditPopup extends React.Component {
   };
 
   handleCardDelete = () => {
-    fetch(
-      "DELETE",
-      window.Routes.api_v1_task_path(this.props.cardId, { format: "json" })
-    ).then(response => {
-      if (response.statusText == "OK") {
+    deleteCard(this.props.cardId).then(response => {
+      if (response.statusText === "OK") {
         this.props.onClose(this.state.task.state);
       } else {
         alert(
