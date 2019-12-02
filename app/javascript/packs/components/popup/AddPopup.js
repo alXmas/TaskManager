@@ -36,7 +36,7 @@ class AddPopup extends Component {
         assignee_id: this.state.assignee.id
       }
     }).then(response => {
-      if (response.statusText == "Created") {
+      if (response.statusText === "Created") {
         this.props.onClose(true);
       } else {
         alert(response.status + " - " + response.statusText);

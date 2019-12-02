@@ -7,19 +7,20 @@ import MakePopupBody from "./MakePopupBody";
 class EditPopup extends Component {
   state = Form.defaultAttributes();
 
-  loadCard = cardId => {
-    this.setState({ isLoading: true });
+  constructor(props) {
+    super(props);
 
+    if (props.cardId) {
+      this.state.isLoading = true;
+      this.loadCard(props.cardId);
+    }
+  }
+
+  loadCard = cardId => {
     getCard(cardId).then(({ data }) => {
       this.setState({ task: data, isLoading: false });
     });
   };
-
-  componentDidUpdate(prevProps) {
-    if (this.props.cardId != null && this.props.cardId !== prevProps.cardId) {
-      this.loadCard(this.props.cardId);
-    }
-  }
 
   handleNameChange = e => {
     this.setState({ task: { ...this.state.task, name: e.target.value } });

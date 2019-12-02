@@ -4,8 +4,7 @@ import Board from "react-trello";
 import LaneHeader from "./LaneHeader";
 import AddPopup from "./popup/AddPopup";
 import EditPopup from "./popup/EditPopup";
-import { updateCard } from "../utils/FetchHelper";
-import { fetch } from "../utils/Fetch";
+import { updateCard, getLine } from "../utils/FetchHelper";
 import { Button } from "react-bootstrap";
 
 class TasksBoard extends Component {
@@ -80,16 +79,12 @@ class TasksBoard extends Component {
   }
 
   fetchLine(state, page = 1) {
-    return fetch(
-      "GET",
-      window.Routes.api_v1_tasks_path({
-        q: { state_eq: state },
-        page: page,
-        per_page: 10,
-        format: "json"
-      })
-    ).then(({ data }) => {
-      return data;
+    return getLine(state, page).then(({ data }) => {
+      const preparedTasks = data.items.map(task => ({
+        ...task,
+        id: task.id.toString()
+      }));
+      return { ...data, items: preparedTasks };
     });
   }
 
@@ -169,6 +164,7 @@ class TasksBoard extends Component {
           onCardClick={this.onCardClick}
         />
         <EditPopup
+          key={this.state.editCardId}
           show={this.state.editPopupShow}
           onClose={this.handleEditClose}
           cardId={this.state.editCardId}
