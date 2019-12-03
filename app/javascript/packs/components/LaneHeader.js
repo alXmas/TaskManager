@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { Fragment, Component } from "react";
 
-export default class LaneHeader extends React.Component {
-  render () {
-    return <div>
-      <b>{this.props.id}</b> ({this.props.cards.length}/{this.props.total_count})
-    </div>
+class LaneHeader extends Component {
+  render() {
+    return (
+      <Fragment>
+        <b>{this.props.id}</b> ({this.props.cards.length}/
+        {this.props.total_count})
+      </Fragment>
+    );
   }
 }
+
+export default LaneHeader;
